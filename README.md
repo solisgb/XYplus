@@ -1,2 +1,2 @@
 # XYplus
-Make temporal XY graphs using matplotlib
+Makes temporal XY graphs using matplotlib
