@@ -5,7 +5,7 @@ Created on Tue Jul 10 19:35:33 2018
 @author: solis
 
 Se asignan nombres a ciertas variables; el nombre de la variable, parte
-    izquierda del signo =, no se puede cambiar, pero sí el contenido situado
+    izquierda del signo =, no se puede cambiar, pero sÃ­ el contenido situado
     a la derecha del signo =.
 """
 # PARAMETERS
@@ -19,16 +19,16 @@ Se asignan nombres a ciertas variables; el nombre de la variable, parte
 f_xml = 'XYplus.xml'
 
 # Directorio de salida; nombre de un directorio dentro de r'...'
-dir_out = r'C:\Users\solis\Documents\work\VM\umbrales_out'
+dir_out = r'C:\Users\solil\Documents\INT\CHS\VM\out'
 
-# grabar lineas horizontales (1: sí, 0: no)
+# grabar lineas horizontales (1: sÃ­, 0: no)
 show_hl = 1
 
 # grabar series auxiliares upper plot
-show_aux = 0
+show_aux = 1
 
 # rangos de fechas (formato dd/mm/yyyy) date1<date2
 # date_2 puede tener el valor 'now', en cuyo caso se sustituye internamente
-# por la fecha de ejecución
+# por la fecha de ejecuciÃ³n
 date_1 = '1/1/1900'
 date_2 = 'now'

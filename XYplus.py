@@ -48,6 +48,7 @@ def make_graphs(project):
     from os.path import join
     import pyodbc
     import db_con_str
+    from time_series import Time_series
     import XYplus_parameters as par
 
     db = project.find('db').text
@@ -60,14 +61,14 @@ def make_graphs(project):
     id_col = int(project.find('select_master').get('id_column')) - 1
 
     cur2 = con.cursor()
-    fecha_col = int(project.find('select_data').get('fecha_column')) - 1
-    value_col = int(project.find('select_data').get('value_column')) - 1
+    ifecha = int(project.find('select_data').get('fecha_column')) - 1
+    ivalue = int(project.find('select_data').get('value_column')) - 1
     ylabel = project.find('graph').get('y_axis_name')
     for row in cur:
 
         # datos de la serie principal
         print(row[id_col])
-        tmp = _serie_get(project, row, cur2, row[id_col], fecha_col, value_col)
+        tmp = _serie_get(project, row, cur2, row[id_col], ifecha, ivalue)
         if tmp is None:
             continue
         series_4xy = [tmp]
@@ -75,18 +76,18 @@ def make_graphs(project):
         # datos de otros puntos relacionados con cada punto de la serie
         # principal. Las series se extraen utilizando la misma select
         if par.show_aux == 1:
-            tss_aux = _datos_aux_get(project, cur2, row[id_col])
+            tss_aux = _datos_aux_get(project, cur2, row[id_col], ifecha,
+                                     ivalue)
+            series_4xy = series_4xy + tss_aux
 
         # datos de los umbrales. Son series especiales
         if par.show_hl == 1:
-            tss = _umbrales_get(project, row[id_col], cur2, tmp.fechas[0],
-                                tmp.fechas[-1])
-            for tss1 in tss:
-                if tss1:
-                    series_4xy.append(deepcopy(tss1))
+            tss_u = _umbrales_get(project, row[id_col], cur2, tmp.fechas[0],
+                                  tmp.fechas[-1])
+            series_4xy = series_4xy + tss_u
 
         # elementos adicionales del gráfico
-        stitle = get_title(project, row)
+        stitle = _title_get(project, row)
         file_name = _file_name_get(project, row)
         dst = join(par.dir_out, file_name)
 
@@ -96,7 +97,7 @@ def make_graphs(project):
     con.close()
 
 
-def _datos_aux_get(project, cur, id1):
+def _datos_aux_get(project, cur, id1, ifecha, ivalue):
     """
     extrae los datos de otros puntos relacionados con el principal
         los datos de los puntos auxiliares son del mismo tipo que
@@ -108,20 +109,40 @@ def _datos_aux_get(project, cur, id1):
         cur: cursor a la BDD para seleccionar los datos
         id1: código del punto principal, del cual queremos ver si tiene
             otros puntos relacionados
+        ifecha: índice de la columna fecha al hacer la select_data
+        ivalue: indice de la columna valor (dato a representar en el eje de
+            ordenadas) al hacer la select data
 
     return
-    None -si la serie no devuelve datos-; o un objeto Time_series
+    Una lista de objetos Time_series o una lista vacía
     """
+    from copy import deepcopy
     from time_series import Time_series
     select_data = project.find('select_data').text.strip()
     select_aux = project.find('select_master_related').text.strip()
     cur.execute(select_aux, id1)
     cods = [row for row in cur]
+    tss = []
     for cods1 in cods:
-        cur.execute(select_data, cods[1])
-        for row in cur:
-            # TODO: instanciar objetos Time_series
-            pass
+        cur.execute(select_data, cods1[1])
+        for row_data in cur:
+            xy = [(row_data[ifecha], row_data[ivalue]) for row_data in cur]
+            if len(xy) < 2:
+                lf.write('{0} tiene menos de 2 datos'.format(id1))
+                continue
+            fechas = [xy1[0] for xy1 in xy]
+            values = [xy1[1] for xy1 in xy]
+            legend = '{}'.format(cods1[1])
+            try:
+                tmp = Time_series(fechas, values, legend, marker='')
+                tss.append(deepcopy(tmp))
+            except Exception as error:
+                lf.write('{0} error al instanciar el objeto Time_series \
+                         con código auxiliar {}'.format(id1, cods1[1]))
+                continue
+    if not tss:
+        lf.write('{0} no tiene series auxiliares'.format(id1))
+    return tss
 
 
 def _serie_get(project, row, cur, id1, ifecha, ivalue):
@@ -145,8 +166,8 @@ def _serie_get(project, row, cur, id1, ifecha, ivalue):
         raise ValueError('select_data debe tener un signo ?')
     cur.execute(select_data, id1)
     xy = [(row_data[ifecha], row_data[ivalue]) for row_data in cur]
-    if len(xy) == 0:
-        lf.write('{0} no tiene datos'.format(id1))
+    if len(xy) < 2:
+        lf.write('{0} tiene menos de 2 datos'.format(id1))
         return None
     fechas = [xy1[0] for xy1 in xy]
     values = [xy1[1] for xy1 in xy]
@@ -168,7 +189,7 @@ def _umbrales_get(project, id1, cur2, fecha1, fecha2):
         cur2: cursor a la BDD para seleccionar los datos
 
     return:
-        una lista de objetos Time_series
+        una lista de objetos Time_series, o una lista vacía
     """
     from copy import deepcopy
     from time_series import Time_series
@@ -192,18 +213,20 @@ def _umbrales_get(project, id1, cur2, fecha1, fecha2):
         # función ad hoc extrayendo los datos de la tabla umbrales
         fechas = [fecha1, fecha2]
         values = [row1_u[umbral_col], row1_u[umbral_col]]
-        legend = legends_umbrales_get(project, row1_u, i)
+        legend = _legends_umbrales_get(project, row1_u, i)
         try:
             tmp = Time_series(fechas, values, legend, marker='')
             ts.append(deepcopy(tmp))
         except Exception as error:
+            lf.write('{0} error al instanciar el objeto Time_series \
+                     para {}'.format(id1, legend))
             continue
     if not ts:
         lf.write('{0} no tiene umbrales'.format(id1))
     return ts
 
 
-def get_title(project, row):
+def _title_get(project, row):
     """
     forma el título de un gráfico
 
@@ -250,7 +273,7 @@ def _legend_main_get(project, row):
     return legend_master.format(*subs)
 
 
-def legends_umbrales_get(project, row1_u, ilegend):
+def _legends_umbrales_get(project, row1_u, ilegend):
     """
     forma la leyenda de uno de los umbrales
 
@@ -366,7 +389,7 @@ def validate_parameters():
     if not exists(par.f_xml):
         raise ValueError('No existe {}'.format(par.f_xml))
     else:
-        if par.f_xml[0:5] != PREFIJO_F_XML:
+        if par.f_xml[0:6] != PREFIJO_F_XML:
             raise ValueError('{} debe empezar por {}'.format(par.f_xml,
                              PREFIJO_F_XML))
     if not isdir(par.dir_out):

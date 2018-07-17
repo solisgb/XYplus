@@ -5,8 +5,6 @@ Created on Mon Jul 16 09:22:00 2018
 Serie temporal para gráficos con el módulo matplotlib
 """
 
-import numpy as np
-
 
 class Time_series():
     """
@@ -21,9 +19,10 @@ class Time_series():
         legend: leyenda de la serie
         marker: marcador de la serie en el gráfico
         """
+        from copy import deepcopy
         if len(fechas) != len(values):
             raise ValueError('fechas y values != longitud')
-        self.fechas = np.array(fechas)
-        self.values = np.array(values)
+        self.fechas = deepcopy(fechas)
+        self.values = deepcopy(values)
         self.legend = legend
         self.marker = marker

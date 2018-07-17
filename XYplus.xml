@@ -12,7 +12,7 @@ Oficina
 	<db>C:\Users\solil\Documents\INTECSA\BBDD\ipasub97.mdb</db>
 -->
 	<project name="Vega Media. CNP con umbrales 2018 y DIA">
-		<db>C:\Users\solis\Documents\DB\ipasub97.mdb</db>
+		<db>\\ESMUR0001\hidrogeologia\BD_IPASUB\ipasub97.mdb</db>
 		<select_master id_column="1">
             SELECT IPA1.COD AS COD, IPA1_UMBRAL.COD_UMBRAL AS COD_UMBRAL, First(IPA1.TOPONIMIA) AS TOPONIMIA, First(ACUIFEROS.NOMACU) AS NOMACU, First(ACUIFEROS.MASUB) AS MASUB
             FROM (ACUIFEROS INNER JOIN IPA1 ON ACUIFEROS.COD_ACU = IPA1.ACUIFERO) INNER JOIN IPA1_UMBRAL ON IPA1.COD = IPA1_UMBRAL.COD
@@ -32,7 +32,7 @@ Oficina
 		<select_data fecha_column="2" value_column="4">
             SELECT IPA2.COD, IPA2.FECHA, IPA2.SITUACION, [ipa1].[z]-[pnp] AS CNP
             FROM IPA1 INNER JOIN IPA2 ON IPA1.COD = IPA2.COD
-            WHERE IPA2.COD=? AND IPA2.FECHA>=#5/1/2018#
+            WHERE IPA2.COD=? AND IPA2.FECHA>#7/1/2015#
             ORDER BY IPA2.FECHA;
 		</select_data>
 		<select_umbrales umbral_column="3">
