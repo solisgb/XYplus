@@ -115,9 +115,14 @@ def _datos_aux_get(project, cur, id1, ifecha, ivalue):
     Una lista de objetos Time_series o una lista vacía
     """
     from copy import deepcopy
+    from XYplus_paramters import show_aux
     from time_series import Time_series
     select_data = project.find('select_data').text.strip()
     select_aux = project.find('select_master_related').text.strip()
+    if len(select_aux) == 0:
+        lf.write('no existe select_master_related, show_aux->0')
+        show_aux = 0
+        return []
     cur.execute(select_aux, id1)
     cods = [row for row in cur]
     tss = []
