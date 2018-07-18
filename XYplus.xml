@@ -44,6 +44,15 @@ Oficina
             <umbral cod="CSA 26/5/2018" parametro="CNP NE"/>
             <umbral cod="DIA 10/10/2011" parametro="CNP NE"/>
 		</select_umbrales>
+		<select_relation_subplot_below column_cod_above="1" column_cod_below="2">
+			SELECT IDIPA1,IDINM FROM IPA1_INM WHERE IDIPA1=?
+		</select_relation_subplot_below>
+		<select_data_subplot_below>
+			SELECT P.FECHA, P.P 
+			FROM Estaciones INNER JOIN P ON Estaciones.COD = P.COD 
+			WHERE Estaciones.COD=? AND P.FECHA&gt;=? AND P.FECHA&lt;=? AND P.P&gt;=0
+			ORDER BY P.FECHA"
+		</select_data_subplot_below>
 		<graph y_axis_name='CNP m s.n.m.'>
 			<title>Evolución piezométrica sondeo {} ({})
 				<column>3</column>
