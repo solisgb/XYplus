@@ -30,7 +30,7 @@ def select_project(FILENAME):
         projects.append(project)
         print(i, end=' ')
         print('. ' + project.get('name'))
-    print('Select project number:')
+    print('Select project number:', end=' ')
     choice = input()
     return projects[int(choice)]
 
@@ -44,9 +44,11 @@ def make_graphs(project):
         project: es el tag del fichero XYplus_parameters.f_xml seleccionado
             en XYplus_main
     """
+    from copy import deepcopy
     from os.path import join
     import pyodbc
     import db_con_str
+    from time_series import Time_series
     import XYplus_parameters as par
 
     db = project.find('db').text
@@ -62,6 +64,7 @@ def make_graphs(project):
     ifecha = int(project.find('select_data').get('fecha_column')) - 1
     ivalue = int(project.find('select_data').get('value_column')) - 1
     ylabel = project.find('graph').get('y_axis_name')
+
     for row in cur:
 
         # datos de la serie principal
@@ -115,14 +118,9 @@ def _datos_aux_get(project, cur, id1, ifecha, ivalue):
     Una lista de objetos Time_series o una lista vacía
     """
     from copy import deepcopy
-    from XYplus_paramters import show_aux
     from time_series import Time_series
     select_data = project.find('select_data').text.strip()
     select_aux = project.find('select_master_related').text.strip()
-    if len(select_aux) == 0:
-        lf.write('no existe select_master_related, show_aux->0')
-        show_aux = 0
-        return []
     cur.execute(select_aux, id1)
     cods = [row for row in cur]
     tss = []
@@ -172,6 +170,11 @@ def _serie_get(project, row, cur, id1, ifecha, ivalue):
     if len(xy) < 2:
         lf.write('{0} tiene menos de 2 datos'.format(id1))
         return None
+    if len(xy) > 0:
+        if xy[0][1] is None:
+            lf.write('{0} tiene al menos 1 valor nulo, si es un valor \
+                     calculado es posible que un término sea nulo'.format(id1))
+            return None
     fechas = [xy1[0] for xy1 in xy]
     values = [xy1[1] for xy1 in xy]
     legend = _legend_main_get(project, row)

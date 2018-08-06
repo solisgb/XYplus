@@ -19,13 +19,13 @@ Se asignan nombres a ciertas variables; el nombre de la variable, parte
 f_xml = 'XYplus.xml'
 
 # Directorio de salida; nombre de un directorio dentro de r'...'
-dir_out = r'C:\Users\solil\Documents\INT\CHS\VM\out'
+dir_out = r'\\Intsrv1008\sgd\00_Proyectos\42151\100_TRABAJO\100_10_DOC_COMUN\INFORMES_VB\PROPUESTA_UMBRALES_PIEZO\RED_PIEZO'
 
 # grabar lineas horizontales (1: sí, 0: no)
-show_hl = 1
+show_hl = 0
 
 # grabar series auxiliares upper plot
-show_aux = 1
+show_aux = 0
 
 # rangos de fechas (formato dd/mm/yyyy) date1<date2
 # date_2 puede tener el valor 'now', en cuyo caso se sustituye internamente

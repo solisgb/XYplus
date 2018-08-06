@@ -1,4 +1,4 @@
-# -*- coding: Latin-1 -*-
+# -*- coding: utf-8 -*-
 """
 Script para hacer graficos temporales con lineas horizontales
 
@@ -32,4 +32,4 @@ if __name__ == "__main__":
         lf.write(MSG)
     finally:
         lf.to_file()
-        print('fin')
+        print('fin; se ha generado el fichero log.txt')

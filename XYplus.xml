@@ -32,7 +32,7 @@ Oficina
 		<select_data fecha_column="2" value_column="4">
             SELECT IPA2.COD, IPA2.FECHA, IPA2.SITUACION, [ipa1].[z]-[pnp] AS CNP
             FROM IPA1 INNER JOIN IPA2 ON IPA1.COD = IPA2.COD
-            WHERE IPA2.COD=? AND IPA2.FECHA>#7/1/2015#
+            WHERE IPA2.COD=? AND IPA2.FECHA&gt;#5/1/2018#
             ORDER BY IPA2.FECHA;
 		</select_data>
 		<select_umbrales umbral_column="3">
@@ -44,15 +44,6 @@ Oficina
             <umbral cod="CSA 26/5/2018" parametro="CNP NE"/>
             <umbral cod="DIA 10/10/2011" parametro="CNP NE"/>
 		</select_umbrales>
-		<select_relation_subplot_below column_cod_above="1" column_cod_below="2">
-			SELECT IDIPA1,IDINM FROM IPA1_INM WHERE IDIPA1=?
-		</select_relation_subplot_below>
-		<select_data_subplot_below>
-			SELECT P.FECHA, P.P 
-			FROM Estaciones INNER JOIN P ON Estaciones.COD = P.COD 
-			WHERE Estaciones.COD=? AND P.FECHA&gt;=? AND P.FECHA&lt;=? AND P.P&gt;=0
-			ORDER BY P.FECHA"
-		</select_data_subplot_below>
 		<graph y_axis_name='CNP m s.n.m.'>
 			<title>Evolución piezométrica sondeo {} ({})
 				<column>3</column>
@@ -70,7 +61,37 @@ Oficina
 			</legend_umbrales>
 		</graph>
 	</project>
-
+	<project name="Vega Media-Baja. Red piezométrica CHS">
+		<db>\\ESMUR0001\hidrogeologia\BD_IPASUB\ipasub97.mdb</db>
+		<select_master id_column="1">
+            SELECT IPA1.COD, IPA1.TOPONIMIA, ACUIFEROS.NOMACU, IPA1.X_UTM, IPA1.Y_UTM, IPA1.Z
+            FROM ACUIFEROS INNER JOIN (IPA1 INNER JOIN IPA1_RED_CONTROL ON IPA1.COD = IPA1_RED_CONTROL.codigo) ON ACUIFEROS.COD_ACU = IPA1.ACUIFERO
+            WHERE IPA1.ACUIFERO='084' AND (IPA1_RED_CONTROL.red='P' Or IPA1_RED_CONTROL.red='PN') AND IPA1_RED_CONTROL.fecha_baja Is Null
+            ORDER BY IPA1.COD;
+			<file_name>VMB_{}_{}.png
+				<column>1</column>
+				<column>2</column>
+			</file_name>
+		</select_master>
+		<select_data fecha_column="2" value_column="3">
+            SELECT IPA2.COD, IPA2.FECHA, [ipa1].[z]-[pnp] AS CNP
+            FROM IPA1 INNER JOIN IPA2 ON IPA1.COD = IPA2.COD
+            WHERE IPA2.COD=?
+            ORDER BY IPA2.COD, IPA2.FECHA;
+		</select_data>
+		<graph y_axis_name='CNP m s.n.m.'>
+			<title>Evol. piez. sondeo {} ({})
+				<column>1</column>
+				<column>2</column>
+			</title>
+			<title>Acuífero {}
+				<column>3</column>
+			</title>
+			<legend_master>'{}'
+				<column>1</column>
+			</legend_master>
+		</graph>
+	</project>
 	<project name="Cuenca Alta. Piezometría Sequía 2018">
 		<dir_out>E:\WORK\CHS\Mingogil\xy</dir_out>
 		<db>E:\BBDD\ipasub97.mdb</db>
