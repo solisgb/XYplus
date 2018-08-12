@@ -17,7 +17,7 @@ Oficina
             SELECT IPA1.COD AS COD, IPA1_UMBRAL.COD_UMBRAL AS COD_UMBRAL, First(IPA1.TOPONIMIA) AS TOPONIMIA, First(ACUIFEROS.NOMACU) AS NOMACU, First(ACUIFEROS.MASUB) AS MASUB
             FROM (ACUIFEROS INNER JOIN IPA1 ON ACUIFEROS.COD_ACU = IPA1.ACUIFERO) INNER JOIN IPA1_UMBRAL ON IPA1.COD = IPA1_UMBRAL.COD
             GROUP BY IPA1.COD, IPA1_UMBRAL.COD_UMBRAL
-            HAVING (((IPA1_UMBRAL.COD_UMBRAL)='CSA 26/5/2018'))
+            HAVING (((IPA1_UMBRAL.COD_UMBRAL)='CSA 26-5-2018'))
             ORDER BY IPA1.COD;
 			<file_name>{0:d}_{1}_{2}.png
 				<column>5</column>
@@ -32,7 +32,7 @@ Oficina
 		<select_data fecha_column="2" value_column="4">
             SELECT IPA2.COD, IPA2.FECHA, IPA2.SITUACION, [ipa1].[z]-[pnp] AS CNP
             FROM IPA1 INNER JOIN IPA2 ON IPA1.COD = IPA2.COD
-            WHERE IPA2.COD=? AND IPA2.FECHA&gt;#5/1/2018#
+            WHERE IPA2.COD=? AND IPA2.FECHA&gt;#1/1/2018#
             ORDER BY IPA2.FECHA;
 		</select_data>
 		<select_umbrales umbral_column="3">
@@ -40,9 +40,9 @@ Oficina
 			FROM IPA1_UMBRAL
 			WHERE IPA1_UMBRAL.COD=? AND IPA1_UMBRAL.COD_UMBRAL=? AND IPA1_UMBRAL.PARAMETRO=?
 			ORDER BY IPA1_UMBRAL.COD, IPA1_UMBRAL.COD_UMBRAL, IPA1_UMBRAL.PARAMETRO;
-            <umbral cod="CSA 26/5/2018" parametro="CNP ND"/>
-            <umbral cod="CSA 26/5/2018" parametro="CNP NE"/>
-            <umbral cod="DIA 10/10/2011" parametro="CNP NE"/>
+            <umbral cod="CSA 26-5-2018" parametro="CNP ND"/>
+            <umbral cod="CSA 26-5-2018" parametro="CNP NE"/>
+            <umbral cod="DIA 10-10-2011" parametro="CNP NE"/>
 		</select_umbrales>
 		<graph y_axis_name='CNP m s.n.m.'>
 			<title>Evolución piezométrica sondeo {} ({})

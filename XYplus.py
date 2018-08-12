@@ -44,7 +44,6 @@ def make_graphs(project):
         project: es el tag del fichero XYplus_parameters.f_xml seleccionado
             en XYplus_main
     """
-    from copy import deepcopy
     from os.path import join
     import pyodbc
     import db_con_str
