@@ -38,7 +38,7 @@ def to_file(dst=None):
         fo = open(join(dst, _DST), 'w')
     else:
         fo = open(_DST, 'w')
-    fo.write('{}'.format(strftime("%a, %d %b %Y %H:%M:%S +0000\n", gmtime())))
+    fo.write('{}'.format(strftime("%a, %d %b %Y %H:%M:%S +0000\n\n", gmtime())))
     if msg:
         fo.write('{}'.format(msg))
     fo.close()

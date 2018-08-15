@@ -12,29 +12,27 @@ class Time_series():
     define los datos y sus atributos para ser representados en un
         gráfico
     """
-    def __init__(self, fechas: [], values: [], legend: str,
-                 marker: str = 'd', line: str = '-'):
+    def __init__(self, fechas: [], values: [], legend: str, marker: str = '.',
+                 scatter: int = 0):
         """
         fechas: lista de dates
         values: lista de floats o integeres
         legend: leyenda de la serie
-        marker: marcador de la serie en el gráfico
-        line: marcador de la línea de un gráfico
         """
         from copy import deepcopy
-        import matplotlib
+        if len(fechas) == 0 or len(values) == 0:
+            raise ValueError('fechas y/0 values no tienen datos')
         if len(fechas) != len(values):
             raise ValueError('fechas y values != longitud')
-#        colors_array = list(matplotlib.colors.cnames.keys())
-        if marker not in matplotlib.markers.MarkerStyle.markers:
-            marker = 'd'
-        if line not in matplotlib.lines.lineStyles:
-            line = '-'
         self.fechas = deepcopy(fechas)
         self.values = deepcopy(values)
         self.legend = legend
-        self.line = line
-        self.marker = marker
+        if len(fechas) == 1:
+            self.marker = '.'
+            self.scatter = 1
+        else:
+            self.marker = marker
+            self.scatter = scatter
 
 
 def XYt_1(t_series: [], stitle: str, ylabel: str, dst: str):
@@ -57,7 +55,12 @@ def XYt_1(t_series: [], stitle: str, ylabel: str, dst: str):
     fig, ax = plt.subplots()
     # El primer objeto es el principal
     for ts1 in t_series:
-        ax.plot(ts1.fechas, ts1.values, marker=ts1.marker, label=ts1.legend)
+        if ts1.scatter == 0:
+            ax.plot(ts1.fechas, ts1.values, marker=ts1.marker,
+                    label=ts1.legend, linestyle='-')
+        else:
+            ax.plot(ts1.fechas, ts1.values, marker=ts1.marker,
+                    label=ts1.legend, linestyle='None')
 
     plt.ylabel(ylabel)
     # rotate and align the tick labels so they look better

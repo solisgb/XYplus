@@ -34,6 +34,11 @@ Oficina
             FROM IPA1 INNER JOIN IPA2 ON IPA1.COD = IPA2.COD
             WHERE IPA2.COD=? AND IPA2.FECHA&gt;#1/1/2018#
             ORDER BY IPA2.FECHA;
+			<situacion_column>3</situacion_column>
+			<situacion>E</situacion>
+			<situacion>D</situacion>
+			<situacion>R</situacion>
+			<situacion>A</situacion>
 		</select_data>
 		<select_umbrales umbral_column="3">
 			SELECT IPA1_UMBRAL.COD_UMBRAL, IPA1_UMBRAL.PARAMETRO, IPA1_UMBRAL.UMBRAL
@@ -52,6 +57,53 @@ Oficina
 			<title>Acuífero {}
 				<column>4</column>
 			</title>
+			<legend_master>'{}'
+				<column>1</column>
+			</legend_master>
+			<legend_umbrales>U. {0} {1}
+				<column>1</column>
+				<column>2</column>
+			</legend_umbrales>
+		</graph>
+	</project>
+	<project name="Vega Baja. CNP pozos con umbrales 2018 y DIA">
+		<db>C:\Users\solis\Documents\DB\ipasub97.mdb</db>
+		<select_master id_column="1">
+			SELECT IPA1.COD, IPA1.TOPONIMIA, ACUIFEROS.NOMACU
+			FROM ACUIFEROS INNER JOIN IPA1 ON ACUIFEROS.COD_ACU = IPA1.ACUIFERO
+			WHERE IPA1.COD='283610202' Or IPA1.COD='283610214' Or IPA1.COD='283610212' Or IPA1.COD='283610213' Or IPA1.COD='273640128' Or IPA1.COD='273640124' Or IPA1.COD='273640125' Or IPA1.COD='273640122' Or IPA1.COD='273640123' Or IPA1.COD='273680060' Or IPA1.COD='273680057' Or IPA1.COD='273630081' Or IPA1.COD='273630082' Or IPA1.COD='273680059' Or IPA1.COD='273680058' Or IPA1.COD='273640126' Or IPA1.COD='273640127' Or IPA1.COD='273670309' Or IPA1.COD='273680065' Or IPA1.COD='273670306' Or IPA1.COD='273670304' Or IPA1.COD='273670305' Or IPA1.COD='273670307' Or IPA1.COD='273670317' Or IPA1.COD='273670302' Or IPA1.COD='273670303' Or IPA1.COD='273640135' Or IPA1.COD='283620141'
+			ORDER BY IPA1.COD;
+			<file_name>{}_{}.png
+				<column>1</column>
+				<column>2</column>
+			</file_name>
+		</select_master>
+		<select_data fecha_column="2" value_column="4">
+            SELECT IPA2.COD, IPA2.FECHA, IPA2.SITUACION, [ipa1].[z]-[pnp] AS CNP
+            FROM IPA1 INNER JOIN IPA2 ON IPA1.COD = IPA2.COD
+            WHERE IPA2.COD=? AND IPA2.FECHA&gt;#1/1/2018#
+            ORDER BY IPA2.FECHA;
+			<situacion_column>3</situacion_column>
+			<situacion>E</situacion>
+			<situacion>D</situacion>
+			<situacion>R</situacion>
+			<situacion>A</situacion>
+		</select_data>
+		<select_umbrales umbral_column="3">
+			SELECT IPA1_UMBRAL.COD_UMBRAL, IPA1_UMBRAL.PARAMETRO, IPA1_UMBRAL.UMBRAL
+			FROM IPA1_UMBRAL
+			WHERE IPA1_UMBRAL.COD=? AND IPA1_UMBRAL.COD_UMBRAL=? AND IPA1_UMBRAL.PARAMETRO=?
+			ORDER BY IPA1_UMBRAL.COD, IPA1_UMBRAL.COD_UMBRAL, IPA1_UMBRAL.PARAMETRO;
+            <umbral cod="CSA 26-5-2018" parametro="CNP ND"/>
+            <umbral cod="CSA 26-5-2018" parametro="CNP NE"/>
+            <umbral cod="DIA 10-10-2011" parametro="CNP NE"/>
+		</select_umbrales>
+		<graph y_axis_name='CNP m s.n.m.'>
+			<title>Evolución piezométrica sondeo {} ({})
+				<column>1</column>
+				<column>2</column>
+			</title>
+			<title>Vega Baja -acuífero Vegas M. y B. del Segura-</title>
 			<legend_master>'{}'
 				<column>1</column>
 			</legend_master>
@@ -84,8 +136,7 @@ Oficina
 				<column>1</column>
 				<column>2</column>
 			</title>
-			<title>Acuífero {}
-				<column>3</column>
+			<title>Vega Baja -acuífero Vegas M. y B. del Segura-
 			</title>
 			<legend_master>'{}'
 				<column>1</column>

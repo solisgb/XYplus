@@ -2,6 +2,13 @@
 """
 Created on Tue May  1 10:54:23 2018
 
+Se hacen gráficos temporales con la librería matplotlib
+
+Tipos
+1) XY distingiendo medidas la situación de las medidas piezométricas
+2) XY en que se asocia al código principal otras series relacionadas en el
+   mismo subplot
+
 @author: solis
 """
 
@@ -47,7 +54,7 @@ def make_graphs(project):
     from os.path import join
     import pyodbc
     import db_con_str
-    from time_series import Time_series
+    from time_series import XYt_1
     import XYplus_parameters as par
 
     db = project.find('db').text
@@ -64,27 +71,36 @@ def make_graphs(project):
     ivalue = int(project.find('select_data').get('value_column')) - 1
     ylabel = project.find('graph').get('y_axis_name')
 
+    # si la serie distingue entre situacion durante medida
+    tags_situacion = project.findall('select_data/situacion')
+    situaciones = [tag.text.strip() for tag in tags_situacion]
+    if situaciones:
+        isitu = int(project.find('select_data/situacion_column').text) - 1
+    else:
+        isitu = None
+
     for row in cur:
 
         # datos de la serie principal
         print(row[id_col])
-        tmp = _serie_get(project, row, cur2, row[id_col], ifecha, ivalue)
-        if tmp is None:
+        ts_4xy = _serie_get(project, row, cur2, row[id_col], ifecha,
+                                ivalue, situaciones, isitu)
+        if len(ts_4xy) == 0:
             continue
-        series_4xy = [tmp]
 
         # datos de otros puntos relacionados con cada punto de la serie
         # principal. Las series se extraen utilizando la misma select
         if par.show_aux == 1:
             tss_aux = _datos_aux_get(project, cur2, row[id_col], ifecha,
                                      ivalue)
-            series_4xy = series_4xy + tss_aux
+            ts_4xy = ts_4xy + tss_aux
 
         # datos de los umbrales. Son series especiales
         if par.show_hl == 1:
-            tss_u = _umbrales_get(project, row[id_col], cur2, tmp.fechas[0],
-                                  tmp.fechas[-1])
-            series_4xy = series_4xy + tss_u
+            tss_u = _umbrales_get(project, row[id_col], cur2,
+                                  ts_4xy[0].fechas[0],
+                                  ts_4xy[0].fechas[-1])
+            ts_4xy = ts_4xy + tss_u
 
         # elementos adicionales del gráfico
         stitle = _title_get(project, row)
@@ -92,7 +108,7 @@ def make_graphs(project):
         dst = join(par.dir_out, file_name)
 
         # dibuja el gráfico
-        XYt_1(series_4xy, stitle, ylabel, dst)
+        XYt_1(ts_4xy, stitle, ylabel, dst)
 
     con.close()
 
@@ -127,8 +143,8 @@ def _datos_aux_get(project, cur, id1, ifecha, ivalue):
         cur.execute(select_data, cods1[1])
         for row_data in cur:
             xy = [(row_data[ifecha], row_data[ivalue]) for row_data in cur]
-            if len(xy) < 2:
-                lf.write('{0} tiene menos de 2 datos'.format(id1))
+            if len(xy) == 0:
+                lf.write('{0} no tiene datos'.format(id1))
                 continue
             fechas = [xy1[0] for xy1 in xy]
             values = [xy1[1] for xy1 in xy]
@@ -145,7 +161,7 @@ def _datos_aux_get(project, cur, id1, ifecha, ivalue):
     return tss
 
 
-def _serie_get(project, row, cur, id1, ifecha, ivalue):
+def _serie_get(project, row, cur, id1, ifecha, ivalue, situaciones, isitu):
     """
     hace select a una BDD e instancia un objeto Temporal_series
 
@@ -155,9 +171,14 @@ def _serie_get(project, row, cur, id1, ifecha, ivalue):
         queremos representar
     cur: cursor a la BDD para seleccionar los datos
     id1: código del punto cuyos datos cuyos queremos representar
+    ifecha: posición de las fechas en el select
+    ivalue: posición de los valores en el select
+    isituacion: posición de las situaciones en el select puede ser None-
+    situaciones: [] valores a considerar en el campo situacion -puede ser
+        vacía-
 
     return
-    None -si la serie no devuelve datos-; o un objeto Time_series
+    lista de objetos Time_series; puede ser vacía
     """
     from time_series import Time_series
     select_data = project.find('select_data').text.strip()
@@ -165,20 +186,61 @@ def _serie_get(project, row, cur, id1, ifecha, ivalue):
     if npar != 1:
         raise ValueError('select_data debe tener un signo ?')
     cur.execute(select_data, id1)
-    xy = [(row_data[ifecha], row_data[ivalue]) for row_data in cur]
-    if len(xy) < 2:
-        lf.write('{0} tiene menos de 2 datos'.format(id1))
-        return None
-    if len(xy) > 0:
+    if isitu is None:
+        xy = [(row_data[ifecha], row_data[ivalue]) for row_data in cur]
+    else:
+        xy = [(row_data[ifecha], row_data[ivalue],
+               row_data[isitu]) for row_data in cur]
+
+    if len(xy) == 0:
+        lf.write('{0} tiene datos'.format(id1))
+        return []
+    else:
         if xy[0][1] is None:
+            # si un punto no tiene valor de z y sí de pnp, la operación
+            # z-pnp devuelve None
             lf.write('{0} tiene al menos 1 valor nulo, si es un valor \
                      calculado es posible que un término sea nulo'.format(id1))
             return None
     fechas = [xy1[0] for xy1 in xy]
     values = [xy1[1] for xy1 in xy]
     legend = _legend_main_get(project, row)
-    ts = Time_series(fechas, values, legend, marker='.')
-    return ts
+    if isitu is not None:
+        situs = [xy1[2] for xy1 in xy]
+        smarker = ' '
+    else:
+        smarker = '.'
+    tss = [Time_series(fechas, values, legend, marker=smarker)]
+    for situacion in situaciones:
+        fechas2 = [fecha1 for (fecha1, situ1) in zip(fechas, situs)
+                   if situ1 == situacion]
+        if len(fechas2) == 0:
+            lf.write('{} no tiene datos {}'.format(id1, situacion))
+            continue
+        values2 = [value1 for (value1, situ1) in zip(values, situs)
+                   if situ1 == situacion]
+        legend = '..{}'.format(situacion)
+        tss.append(Time_series(fechas2, values2, legend,
+                               marker='.', scatter=1))
+
+    return tss
+
+
+def _time_series_situaciones_get(tmp, isitu):
+    """
+
+    input
+    project: tag del proyecto seleccionado
+    row: fila de select_master correspondiente al punto cuyos umbrales
+        queremos representar
+    cur: cursor a la BDD para seleccionar los datos
+    id1: código del punto cuyos datos cuyos queremos representar
+
+    return
+    [] de objetos Time_series diferenciados por la situación durante la medida
+        , la lista puede ser vacía
+    """
+    return None
 
 
 def _umbrales_get(project, id1, cur2, fecha1, fecha2):
@@ -251,6 +313,7 @@ def _title_get(project, row):
     for i, title in enumerate(titles):
         cols = title.findall('column')
         if len(cols) == 0:
+            stitles[i] = title.text.strip()
             continue
         subs = [row[int(col.text)-1] for col in cols]
         stitles[i] = stitles[i].format(*subs)
@@ -325,46 +388,6 @@ def _file_name_get(project, row):
     subs = [row[int(tcol.text)-1] for tcol in tcols]
     sname = fname.format(*subs)
     return sname
-
-
-def XYt_1(t_series, stitle, ylabel, dst):
-    """
-    dibuja un gráfico xy de una o más series
-
-    input
-        t_series: lista de objetos Time_series; el primer elemento se
-            considera la series principal
-        stitle: título del gráfico
-        ylabel: título del eje Y
-        dst: directorio donde se graba el gráfico (debe existir)
-    """
-    import matplotlib.pyplot as mpl
-    import matplotlib.pyplot as plt
-    import matplotlib.dates as mdates
-
-    dateFmt = mdates.DateFormatter('%d-%m-%Y')
-
-    fig, ax = plt.subplots()
-    # El primer objeto es el principal
-    for ts1 in t_series:
-        ax.plot(ts1.fechas, ts1.values, marker=ts1.marker, label=ts1.legend)
-
-    plt.ylabel(ylabel)
-    # rotate and align the tick labels so they look better
-    fig.autofmt_xdate()
-
-    ax.spines['right'].set_visible(False)
-    ax.spines['top'].set_visible(False)
-
-    ax.xaxis.set_major_formatter(dateFmt)
-    ax.set_title(stitle)
-    mpl.legend(loc='best', framealpha=0.5)
-#    mpl.legend(loc='best', framealpha=0.5)
-    mpl.tight_layout()
-    mpl.grid(True)
-
-    fig.savefig(dst)
-    plt.close('all')
 
 
 def validate_parameters():

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-Script para hacer graficos temporales con lineas horizontales
+Driver XYplus.py; script para hacer graficos temporales
 
 @solis
 """
