@@ -15,7 +15,7 @@ class Time_series():
         gráfico
     """
     def __init__(self, fechas: [], values: [], legend: str, marker: str = '.',
-                 scatter: int = 0, slistyle: str = '-'):
+                 scatter: int = 0, slinestyle: str = '-'):
         """
         fechas: lista de dates
         values: lista de floats o integeres
@@ -35,6 +35,7 @@ class Time_series():
         else:
             self.marker = marker
             self.scatter = scatter
+        self.linestyle = slinestyle
 
 
 def XYt_1(t_series: [], stitle: str, ylabel: str, dst: str):
@@ -61,7 +62,7 @@ def XYt_1(t_series: [], stitle: str, ylabel: str, dst: str):
     for ts1 in t_series:
         if ts1.scatter == 0:
             ax.plot(ts1.fechas, ts1.values, marker=ts1.marker,
-                    label=ts1.legend, linestyle=ts1.slinestyle)
+                    label=ts1.legend, linestyle=ts1.linestyle)
         else:
             ax.plot(ts1.fechas, ts1.values, marker=ts1.marker,
                     label=ts1.legend, linestyle='None')

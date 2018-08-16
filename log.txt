@@ -1,0 +1,21 @@
+Thu, 16 Aug 2018 18:29:33 +0000
+
+273630081 no tiene datos R
+273630081 no tiene datos A
+
+Traceback (most recent call last):
+  File "C:\Users\solis\Documents\DEV\python3\Graphs\XYplus\XYplus.py", line 288, in _umbrales_get
+    linestyle=line_styles[j_ls])
+TypeError: __init__() got an unexpected keyword argument 'linestyle'
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:/Users/solis/Documents/DEV/python3/Graphs/XYplus/XYplus_main.py", line 23, in <module>
+    make_graphs(project)
+  File "C:\Users\solis\Documents\DEV\python3\Graphs\XYplus\XYplus.py", line 102, in make_graphs
+    ts_4xy[0].fechas[-1])
+  File "C:\Users\solis\Documents\DEV\python3\Graphs\XYplus\XYplus.py", line 294, in _umbrales_get
+    para {}'.format(id1, legend))
+ValueError: cannot switch from manual field specification to automatic field numbering
+
