@@ -264,8 +264,9 @@ def _umbrales_get(project, id1, cur2, fecha1, fecha2):
     umbral_col = int(project.find('select_umbrales').get('umbral_column')) - 1
     if select_umbrales.count('?') != 3:
         raise ValueError('select_umbrales debe tener 3 signos ?')
-
+    line_styles = (':', '-.', '--')
     ts = []
+    j_ls = -1
     for i, umbral in enumerate(project.findall('select_umbrales/umbral')):
         parametro = umbral.get('parametro').strip()
         cod_u = umbral.get('cod').strip()
@@ -281,9 +282,13 @@ def _umbrales_get(project, id1, cur2, fecha1, fecha2):
         fechas = [fecha1, fecha2]
         values = [row1_u[umbral_col], row1_u[umbral_col]]
         legend = _legends_umbrales_get(project, row1_u, i)
+        j_ls += 1
         try:
-            tmp = Time_series(fechas, values, legend, marker='')
+            tmp = Time_series(fechas, values, legend, marker='',
+                              linestyle=line_styles[j_ls])
             ts.append(deepcopy(tmp))
+            if j_ls == 2:
+                j_ls = -1
         except Exception as error:
             lf.write('{0} error al instanciar el objeto Time_series \
                      para {}'.format(id1, legend))

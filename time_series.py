@@ -4,6 +4,8 @@ Created on Mon Jul 16 09:22:00 2018
 @author: Luis Solis
 
 Serie temporal para gráficos con el módulo matplotlib
+
+version: 0.2
 """
 
 
@@ -13,7 +15,7 @@ class Time_series():
         gráfico
     """
     def __init__(self, fechas: [], values: [], legend: str, marker: str = '.',
-                 scatter: int = 0):
+                 scatter: int = 0, slistyle: str = '-'):
         """
         fechas: lista de dates
         values: lista de floats o integeres
@@ -46,22 +48,26 @@ def XYt_1(t_series: [], stitle: str, ylabel: str, dst: str):
         ylabel: título del eje Y
         dst: directorio donde se graba el gráfico (debe existir)
     """
-    import matplotlib.pyplot as mpl
     import matplotlib.pyplot as plt
     import matplotlib.dates as mdates
+    from matplotlib.ticker import AutoMinorLocator
 
     dateFmt = mdates.DateFormatter('%d-%m-%Y')
+    xminorLocator = AutoMinorLocator()
+    yminorLocator = AutoMinorLocator()
 
     fig, ax = plt.subplots()
     # El primer objeto es el principal
     for ts1 in t_series:
         if ts1.scatter == 0:
             ax.plot(ts1.fechas, ts1.values, marker=ts1.marker,
-                    label=ts1.legend, linestyle='-')
+                    label=ts1.legend, linestyle=ts1.slinestyle)
         else:
             ax.plot(ts1.fechas, ts1.values, marker=ts1.marker,
                     label=ts1.legend, linestyle='None')
 
+    ax.xaxis.set_minor_locator(xminorLocator)
+    ax.yaxis.set_minor_locator(yminorLocator)
     plt.ylabel(ylabel)
     # rotate and align the tick labels so they look better
     fig.autofmt_xdate()
@@ -71,9 +77,9 @@ def XYt_1(t_series: [], stitle: str, ylabel: str, dst: str):
 
     ax.xaxis.set_major_formatter(dateFmt)
     ax.set_title(stitle)
-    mpl.legend(loc='best', framealpha=0.5)
-    mpl.tight_layout()
-    mpl.grid(True)
+    plt.legend(loc='best', framealpha=0.5)
+    plt.tight_layout()
+    plt.grid(True)
 
     fig.savefig(dst)
     plt.close('all')
