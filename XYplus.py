@@ -285,7 +285,7 @@ def _umbrales_get(project, id1, cur2, fecha1, fecha2):
         j_ls += 1
         try:
             tmp = Time_series(fechas, values, legend, marker='',
-                              linestyle=line_styles[j_ls])
+                              slinestyle=line_styles[j_ls])
             ts.append(deepcopy(tmp))
             if j_ls == 2:
                 j_ls = -1
