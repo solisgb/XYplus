@@ -84,3 +84,33 @@ def XYt_1(t_series: [], stitle: str, ylabel: str, dst: str):
 
     fig.savefig(dst)
     plt.close('all')
+
+
+def XYt_1_xml(t_series: [], stitle: str, ylabel: str, dst: str):
+    """
+    graba un fichero xml con los datos de un gráfico xy de una o más series
+
+    input
+        t_series: lista de objetos Time_series; el primer elemento se
+            considera la series principal
+        stitle: título del gráfico
+        ylabel: título del eje Y
+        dst: directorio donde se graba el gráfico (debe existir)
+    """
+    from os.path import splitext
+
+    name, ext = splitext(dst)
+    fo = open(name + '.xml', 'w')
+    fo.write('<?xml version="1.0" encoding="windows-1252"?>\n')
+    fo.write('<xy>\n')
+    fo.write('<titulo>{}</titulo>\n'.format(stitle))
+    fo.write('<eje_y_nombre>{}</eje_y_nombre>\n'.format(ylabel))
+    # El primer objeto es el principal
+    for ts1 in t_series:
+        fo.write('<id>{}\n'.format(ts1.legend))
+        for fecha, value in zip(ts1.fechas, ts1.values):
+            fo.write('<d>{0:s}\t{1:0.2f}</d>\n'.
+                     format(fecha.strftime("%d/%m/%Y %H"), value))
+        fo.write('</id>\n')
+    fo.write('</xy>\n')
+    fo.close()

@@ -19,13 +19,16 @@ Se asignan nombres a ciertas variables; el nombre de la variable, parte
 f_xml = 'XYplus.xml'
 
 # Directorio de salida; nombre de un directorio dentro de r'...'
-dir_out = r'C:\Users\solis\Documents\work\VMB\INFORMES_VB\PROPUESTA_UMBRALES_PIEZO\UMBRALES'
+dir_out = r'\\ESMUR0001\hidrogeologia\_clientes\chs\BES_VMB_2019\VMB\20190520_CSA\VB_DESDE_20180101'
 
 # grabar lineas horizontales (1: sí, 0: no)
 show_hl = 1
 
 # grabar series auxiliares upper plot
 show_aux = 0
+
+# grabar un fichero por grafico con los datos
+write_data = 1
 
 # rangos de fechas (formato dd/mm/yyyy) date1<date2
 # date_2 puede tener el valor 'now', en cuyo caso se sustituye internamente

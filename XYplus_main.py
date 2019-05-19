@@ -17,6 +17,8 @@ if __name__ == "__main__":
 
         validate_parameters()
         project = select_project(f_xml)
+#        if project is None:
+#            raise ValueError('El usuario no ha seleccionado un proyecto válido')
 
         startTime = time()
 
@@ -26,8 +28,9 @@ if __name__ == "__main__":
         print('The script took {0}'.format(str(timedelta(seconds=xtime))))
     except Exception as e:
         import traceback
-        import logging
-        logging.error(traceback.format_exc())
+        # import logging
+        print(e)
+        # logging.error(traceback.format_exc())
         MSG = '\n{}'.format(traceback.format_exc())
         lf.write(MSG)
     finally:

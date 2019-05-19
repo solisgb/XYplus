@@ -9,13 +9,41 @@ file_name: es el string que contiene como mínimo un {} y la extensión del fich
 Casa
 	<db>C:\Users\solis\Documents\DB\ipasub97.mdb</db>
 Oficina
+    <db>\\ESMUR0001\hidrogeologia\BD_IPASUB</db>
 	<db>C:\Users\solil\Documents\INTECSA\BBDD\ipasub97.mdb</db>
 -->
+	<project name="GPS Vega Media Abanilla">
+		<db>\\Intsrv1008\sgd\00_Proyectos\42151\100_TRABAJO\100_10_DOC_COMUN\GPS\2_2018_GPS\03_ campaign_301810\gps_2018.accdb</db>
+		<select_master id_column="1">
+			SELECT stations.ID, stations.NAME
+			FROM stations
+			ORDER BY stations.ID;
+			<file_name>{0}_{1}.png
+				<column>1</column>
+				<column>2</column>
+			</file_name>
+		</select_master>
+		<select_data fecha_column="2" value_column="3">
+			SELECT xyz.ID, xyz.FECHA, xyz.Z
+			FROM xyz
+			WHERE xyz.ID=?
+			ORDER BY xyz.ID, xyz.FECHA;
+		</select_data>
+		<graph y_axis_name='Z m s.n.m.'>
+			<title>Evolución Z en el punto {} ({})
+				<column>1</column>
+				<column>2</column>
+			</title>
+			<legend_master>'{}'
+				<column>1</column>
+			</legend_master>
+		</graph>
+	</project>
 	<project name="Vega Media. CNP con umbrales 2018 y DIA">
 		<db>\\ESMUR0001\hidrogeologia\BD_IPASUB\ipasub97.mdb</db>
 		<select_master id_column="1">
             SELECT IPA1.COD AS COD, IPA1_UMBRAL.COD_UMBRAL AS COD_UMBRAL, First(IPA1.TOPONIMIA) AS TOPONIMIA, First(ACUIFEROS.NOMACU) AS NOMACU, First(ACUIFEROS.MASUB) AS MASUB
-            FROM (ACUIFEROS INNER JOIN IPA1 ON ACUIFEROS.COD_ACU = IPA1.ACUIFERO) INNER JOIN IPA1_UMBRAL ON IPA1.COD = IPA1_UMBRAL.COD
+            FROM ((ACUIFEROS INNER JOIN IPA1 ON ACUIFEROS.COD_ACU = IPA1.ACUIFERO) INNER JOIN IPA1_UMBRAL ON IPA1.COD = IPA1_UMBRAL.COD)
             GROUP BY IPA1.COD, IPA1_UMBRAL.COD_UMBRAL
             HAVING (((IPA1_UMBRAL.COD_UMBRAL)='CSA 26-5-2018'))
             ORDER BY IPA1.COD;
@@ -32,7 +60,7 @@ Oficina
 		<select_data fecha_column="2" value_column="4">
             SELECT IPA2.COD, IPA2.FECHA, IPA2.SITUACION, [ipa1].[z]-[pnp] AS CNP
             FROM IPA1 INNER JOIN IPA2 ON IPA1.COD = IPA2.COD
-            WHERE IPA2.COD=? AND IPA2.FECHA&gt;#1/1/2018#
+            WHERE IPA2.COD=? AND IPA2.FECHA>#01/01/2018#
             ORDER BY IPA2.FECHA;
 			<situacion_column>3</situacion_column>
 			<situacion>E</situacion>
@@ -67,11 +95,11 @@ Oficina
 		</graph>
 	</project>
 	<project name="Vega Baja. CNP pozos con umbrales 2018 y DIA">
-		<db>C:\Users\solis\Documents\DB\ipasub97.mdb</db>
+		<db>\\ESMUR0001\hidrogeologia\BD_IPASUB\Ipasub97.mdb</db>
 		<select_master id_column="1">
 			SELECT IPA1.COD, IPA1.TOPONIMIA, ACUIFEROS.NOMACU
 			FROM ACUIFEROS INNER JOIN IPA1 ON ACUIFEROS.COD_ACU = IPA1.ACUIFERO
-			WHERE IPA1.COD='283610202' Or IPA1.COD='283610214' Or IPA1.COD='283610212' Or IPA1.COD='283610213' Or IPA1.COD='273640128' Or IPA1.COD='273640124' Or IPA1.COD='273640125' Or IPA1.COD='273640122' Or IPA1.COD='273640123' Or IPA1.COD='273680060' Or IPA1.COD='273680057' Or IPA1.COD='273630081' Or IPA1.COD='273630082' Or IPA1.COD='273680059' Or IPA1.COD='273680058' Or IPA1.COD='273640126' Or IPA1.COD='273640127' Or IPA1.COD='273670309' Or IPA1.COD='273680065' Or IPA1.COD='273670306' Or IPA1.COD='273670304' Or IPA1.COD='273670305' Or IPA1.COD='273670307' Or IPA1.COD='273670317' Or IPA1.COD='273670302' Or IPA1.COD='273670303' Or IPA1.COD='273640135' Or IPA1.COD='283620141'
+			WHERE IPA1.COD='283610202' Or IPA1.COD='283610214' Or IPA1.COD='283610212' Or IPA1.COD='283610213' Or IPA1.COD='273640128' Or IPA1.COD='273640124' Or IPA1.COD='273640125' Or IPA1.COD='273640122' Or IPA1.COD='273640123' Or IPA1.COD='273680060' Or IPA1.COD='273680057' Or IPA1.COD='273630081' Or IPA1.COD='273630082' Or IPA1.COD='273680059' Or IPA1.COD='273680058' Or IPA1.COD='273640126' Or IPA1.COD='273640127' Or IPA1.COD='273670309' Or IPA1.COD='273680065' Or IPA1.COD='273670306' Or IPA1.COD='273670304' Or IPA1.COD='273670305' Or IPA1.COD='273670307' Or IPA1.COD='273670317' Or IPA1.COD='273670302' Or IPA1.COD='273670303' Or IPA1.COD='273679002' Or IPA1.COD='273640135' Or IPA1.COD='283620141'
 			ORDER BY IPA1.COD;
 			<file_name>{}_{}.png
 				<column>1</column>
@@ -81,7 +109,7 @@ Oficina
 		<select_data fecha_column="2" value_column="4">
             SELECT IPA2.COD, IPA2.FECHA, IPA2.SITUACION, [ipa1].[z]-[pnp] AS CNP
             FROM IPA1 INNER JOIN IPA2 ON IPA1.COD = IPA2.COD
-            WHERE IPA2.COD=? AND IPA2.FECHA&gt;#1/1/1900#
+            WHERE IPA2.COD=? AND IPA2.FECHA>#01/01/2018#
             ORDER BY IPA2.FECHA;
 			<situacion_column>3</situacion_column>
 			<situacion>E</situacion>
@@ -113,6 +141,55 @@ Oficina
 			</legend_umbrales>
 		</graph>
 	</project>
+
+	<project name="Mingogil y Alcadozo. CNP pozos con umbrales DIA 2011">
+		<db>\\ESMUR0001\hidrogeologia\BD_IPASUB\Ipasub97.mdb</db>
+		<select_master id_column="1">
+			SELECT IPA1.COD, IPA1.TOPONIMIA, ACUIFEROS.NOMACU
+			FROM ACUIFEROS INNER JOIN IPA1 ON ACUIFEROS.COD_ACU = IPA1.ACUIFERO
+			WHERE IPA1.COD='243330051' Or IPA1.COD='243330052' Or IPA1.COD='243380019' Or IPA1.COD='243380020' Or IPA1.COD='253350017' Or IPA1.COD='253420053' Or IPA1.COD='253420054' Or IPA1.COD='253420056' Or IPA1.COD='253420057' Or IPA1.COD='253420058' Or IPA1.COD='253420060' Or IPA1.COD='253430036' Or IPA1.COD='253430037'
+			ORDER BY IPA1.COD;
+			<file_name>{}_{}.png
+				<column>1</column>
+				<column>2</column>
+			</file_name>
+		</select_master>
+		<select_data fecha_column="2" value_column="4">
+            SELECT IPA2.COD, IPA2.FECHA, IPA2.SITUACION, [ipa1].[z]-[pnp] AS CNP
+            FROM IPA1 INNER JOIN IPA2 ON IPA1.COD = IPA2.COD
+            WHERE IPA2.COD=? AND IPA2.FECHA>=#01/01/1950#
+            ORDER BY IPA2.FECHA;
+			<situacion_column>3</situacion_column>
+			<situacion>E</situacion>
+			<situacion>D</situacion>
+			<situacion>R</situacion>
+			<situacion>A</situacion>
+		</select_data>
+		<select_umbrales umbral_column="3">
+			SELECT IPA1_UMBRAL.COD_UMBRAL, IPA1_UMBRAL.PARAMETRO, IPA1_UMBRAL.UMBRAL
+			FROM IPA1_UMBRAL
+			WHERE IPA1_UMBRAL.COD=? AND IPA1_UMBRAL.COD_UMBRAL=? AND IPA1_UMBRAL.PARAMETRO=?
+			ORDER BY IPA1_UMBRAL.COD, IPA1_UMBRAL.COD_UMBRAL, IPA1_UMBRAL.PARAMETRO;
+            <umbral cod="DIA 15-12-2011" parametro="CNP ND"/>
+		</select_umbrales>
+		<graph y_axis_name='CNP m s.n.m.'>
+			<title>Evolución piezométrica sondeo {} ({})
+				<column>1</column>
+				<column>2</column>
+			</title>
+			<title>Acuífero {}
+				<column>3</column>
+			</title>
+			<legend_master>'{}'
+				<column>1</column>
+			</legend_master>
+			<legend_umbrales>U. {0} {1}
+				<column>1</column>
+				<column>2</column>
+			</legend_umbrales>
+		</graph>
+	</project>
+
 	<project name="Vega Media-Baja. Red piezométrica CHS">
 		<db>\\ESMUR0001\hidrogeologia\BD_IPASUB\ipasub97.mdb</db>
 		<select_master id_column="1">
@@ -126,10 +203,15 @@ Oficina
 			</file_name>
 		</select_master>
 		<select_data fecha_column="2" value_column="3">
-            SELECT IPA2.COD, IPA2.FECHA, [ipa1].[z]-[pnp] AS CNP
+            SELECT IPA2.COD, IPA2.FECHA, [ipa1].[z]-[pnp] AS CNP, IPA2.SITUACION
             FROM IPA1 INNER JOIN IPA2 ON IPA1.COD = IPA2.COD
             WHERE IPA2.COD=? AND IPA2.FECHA&gt;#1/1/1901#
             ORDER BY IPA2.COD, IPA2.FECHA;
+			<situacion_column>4</situacion_column>
+			<situacion>E</situacion>
+			<situacion>D</situacion>
+			<situacion>R</situacion>
+			<situacion>A</situacion>
 		</select_data>
 		<graph y_axis_name='CNP m s.n.m.'>
 			<title>Evol. piez. sondeo {} ({})
@@ -144,8 +226,7 @@ Oficina
 		</graph>
 	</project>
 	<project name="Cuenca Alta. Piezometría Sequía 2018">
-		<dir_out>E:\WORK\CHS\Mingogil\xy</dir_out>
-		<db>E:\BBDD\ipasub97.mdb</db>
+		<db>\\ESMUR0001\hidrogeologia\BD_IPASUB\ipasub97.mdb</db>
 		<select_master id_column="1">
 		SELECT IPA1.COD, IPA1.TOPONIMIA, ACUIFEROS.NOMACU, ACUIFEROS.MASUB, IPA1_UMBRAL.COD_UMBRAL
 		FROM (ACUIFEROS INNER JOIN IPA1 ON ACUIFEROS.COD_ACU = IPA1.ACUIFERO) INNER JOIN IPA1_UMBRAL ON IPA1.COD = IPA1_UMBRAL.COD
@@ -184,6 +265,164 @@ Oficina
 				<column>1</column>
 				<column>2</column>
 			</legend_umbrales>
+		</graph>
+	</project>
+	<project name="Sinclinal de Calasparra. Piezometría Sequía 2018">
+		<db>\\ESMUR0001\hidrogeologia\BD_IPASUB\ipasub97.mdb</db>
+		<select_master id_column="1">
+            SELECT IPA1.COD, IPA1.TOPONIMIA
+            FROM IPA1
+            WHERE COD='253535001' OR COD='253570002' OR COD='253580002' OR COD='263450049' OR COD='253540013' OR COD='253580007' OR COD='253575007' OR COD='253575008' OR COD='253575009' OR COD='263460052' OR COD='253585004' OR COD='253585005' OR COD='253575006' OR COD='253535002' OR COD='253535003' OR COD='253575001' OR COD='253575002' OR COD='253575003' OR COD='253575004' OR COD='253575005' OR COD='253580006'
+            ORDER BY IPA1.COD;
+			<file_name>{}_{}.png
+				<column>1</column>
+				<column>2</column>
+			</file_name>
+		</select_master>
+		<select_data fecha_column="2" value_column="4">
+            SELECT IPA2.COD, IPA2.FECHA, IPA2.SITUACION, [ipa1].[z]-[pnp] AS CNP
+            FROM IPA1 INNER JOIN IPA2 ON IPA1.COD = IPA2.COD
+            WHERE IPA2.COD=? AND IPA2.FECHA&gt;#02/01/2018#
+            ORDER BY IPA2.COD, IPA2.FECHA;
+			<situacion_column>3</situacion_column>
+			<situacion>E</situacion>
+			<situacion>D</situacion>
+			<situacion>R</situacion>
+			<situacion>A</situacion>
+		</select_data>
+		<graph y_axis_name='CNP m s.n.m.'>
+			<title>Evolución piezométrica sondeo {} ({})
+				<column>1</column>
+				<column>2</column>
+			</title>
+			<title>Acuífero Sinclinal de Calasparra</title>
+			<legend_master>'{}'
+				<column>1</column>
+			</legend_master>
+		</graph>
+	</project>
+	<project name="Piezometría Ipasub selección por ACUIFEROS, FECHA últ. medida y número de medidas">
+		<db>\\ESMUR0001\hidrogeologia\BD_IPASUB\ipasub97.mdb</db>
+		<select_master id_column="1">
+			SELECT IPA1.COD AS COD, ACUIFEROS.NOMACU AS ACU, IPA1.X_UTM AS X, IPA1.Y_UTM AS Y, IPA1.Z AS Z, IPA1.PROPIETARI AS PROPIET, IPA1.TOPONIMIA AS NOMBRE, IPA1.PROF AS PROFUNDIDAD, IPA1.Q_LS AS Q_LS, IPA1.BES AS BES, Min(IPA2.FECHA) AS FECHA1, Max(IPA2.FECHA) AS FECHA_ULT, Count(IPA1.COD) AS NMEDIDAS
+			FROM ACUIFEROS INNER JOIN (IPA1 INNER JOIN IPA2 ON IPA1.COD = IPA2.COD) ON ACUIFEROS.COD_ACU = IPA1.ACUIFERO
+			WHERE ACUIFEROS.NOMACU='Ascoy-Sopalmo'
+			GROUP BY IPA1.COD, ACUIFEROS.NOMACU, IPA1.X_UTM, IPA1.Y_UTM, IPA1.Z, IPA1.PROPIETARI, IPA1.TOPONIMIA, IPA1.PROF, IPA1.Q_LS, IPA1.BES
+			ORDER BY IPA1.COD;
+			<file_name>{}_{}.png
+				<column>1</column>
+				<column>2</column>
+			</file_name>
+		</select_master>
+		<select_master_related id_master="1">
+			SELECT COD1,COD2 FROM IPA1_SELF WHERE COD1=? ORDER BY COD2
+			<select_xy>SELECT X_UTM, Y_UTM FROM IPA1 WHERE COD=?</select_xy>
+		</select_master_related>
+		<select_data fecha_column="2" value_column="4">
+            SELECT IPA2.COD, IPA2.FECHA, IPA2.SITUACION, [ipa1].[z]-[pnp] AS CNP
+            FROM IPA1 INNER JOIN IPA2 ON IPA1.COD = IPA2.COD
+            WHERE IPA2.COD=?
+            ORDER BY IPA2.FECHA;
+			<situacion_column>3</situacion_column>
+			<situacion>E</situacion>
+			<situacion>D</situacion>
+			<situacion>R</situacion>
+			<situacion>A</situacion>
+		</select_data>
+		<graph y_axis_name='CNP m s.n.m.'>
+			<title>Evolución piezométrica sondeo {} ({})
+				<column>1</column>
+				<column>7</column>
+			</title>
+			<title>Acuífero {}
+				<column>2</column>
+			</title>
+			<legend_master>'{}'
+				<column>1</column>
+			</legend_master>
+		</graph>
+	</project>
+	<project name="Piezometría IPASUB TODA">
+		<db>\\ESMUR0001\hidrogeologia\BD_IPASUB\ipasub97.mdb</db>
+		<select_master id_column="1">
+			SELECT IPA1.COD AS COD, ACUIFEROS.NOMACU AS ACU, IPA1.X_UTM AS X, IPA1.Y_UTM AS Y, IPA1.Z AS Z, IPA1.PROPIETARI AS PROPIET, IPA1.TOPONIMIA AS NOMBRE, IPA1.PROF AS PROFUNDIDAD, IPA1.Q_LS AS Q_LS, IPA1.BES AS BES, Min(IPA2.FECHA) AS FECHA1, Max(IPA2.FECHA) AS FECHA_ULT, Count(IPA1.COD) AS NMEDIDAS
+			FROM ACUIFEROS INNER JOIN (IPA1 INNER JOIN IPA2 ON IPA1.COD = IPA2.COD) ON ACUIFEROS.COD_ACU = IPA1.ACUIFERO
+			GROUP BY IPA1.COD, ACUIFEROS.NOMACU, IPA1.X_UTM, IPA1.Y_UTM, IPA1.Z, IPA1.PROPIETARI, IPA1.TOPONIMIA, IPA1.PROF, IPA1.Q_LS, IPA1.BES
+			HAVING (((IPA1.X_UTM)>60000) AND ((IPA1.Y_UTM)>4000000) AND ((IPA1.Z)>=0) AND ((Count(IPA1.COD))>=5))
+			ORDER BY IPA1.COD;
+			<file_name>{}_{}.png
+				<column>1</column>
+				<column>2</column>
+			</file_name>
+		</select_master>
+		<select_master_related id_master="1">
+			SELECT COD1,COD2 FROM IPA1_SELF WHERE COD1=? ORDER BY COD2
+			<select_xy>SELECT X_UTM, Y_UTM FROM IPA1 WHERE COD=?</select_xy>
+		</select_master_related>
+		<select_data fecha_column="2" value_column="4">
+            SELECT IPA2.COD, IPA2.FECHA, IPA2.SITUACION, [ipa1].[z]-[pnp] AS CNP
+            FROM IPA1 INNER JOIN IPA2 ON IPA1.COD = IPA2.COD
+            WHERE IPA2.COD=?
+            ORDER BY IPA2.FECHA;
+			<situacion_column>3</situacion_column>
+			<situacion>E</situacion>
+			<situacion>D</situacion>
+			<situacion>R</situacion>
+			<situacion>A</situacion>
+		</select_data>
+		<graph y_axis_name='CNP m s.n.m.'>
+			<title>Evolución piezométrica sondeo {} ({})
+				<column>1</column>
+				<column>7</column>
+			</title>
+			<title>Acuífero {}
+				<column>2</column>
+			</title>
+			<legend_master>'{}'
+				<column>1</column>
+			</legend_master>
+		</graph>
+	</project>
+	<project name="Red piezométrica CHS">
+		<db>\\ESMUR0001\hidrogeologia\BD_IPASUB\ipasub97.mdb</db>
+		<select_master id_column="3">
+			SELECT ACUIFEROS.MASUB, ACUIFEROS.NOMACU, IPA1.COD
+			FROM ((ACUIFEROS INNER JOIN IPA1 ON ACUIFEROS.COD_ACU = IPA1.ACUIFERO) INNER JOIN IPA1_RED_CONTROL ON IPA1.COD = IPA1_RED_CONTROL.codigo) INNER JOIN IPA2 ON IPA1.COD = IPA2.COD
+			WHERE (((IPA1_RED_CONTROL.red)='P' Or (IPA1_RED_CONTROL.red)='PN') AND ((IPA1_RED_CONTROL.fecha_baja) Is Null) AND ((IPA2.FECHA)>#1/1/2018#))
+			GROUP BY ACUIFEROS.MASUB, ACUIFEROS.NOMACU, IPA1.COD
+			ORDER BY ACUIFEROS.MASUB, ACUIFEROS.NOMACU, IPA1.COD;
+			<file_name>{0:03d}_{1}_{2}.png
+				<column>1</column>
+				<column>2</column>
+				<column>3</column>
+			</file_name>
+		</select_master>
+		<select_master_related id_master="3">
+			SELECT COD1, COD2 FROM IPA1_SELF WHERE COD1=? ORDER BY COD2
+			<select_xy>SELECT X_UTM, Y_UTM FROM IPA1 WHERE COD=?</select_xy>
+		</select_master_related>
+		<select_data fecha_column="2" value_column="4">
+            SELECT IPA2.COD, IPA2.FECHA, IPA2.SITUACION, [ipa1].[z]-[pnp] AS CNP
+            FROM IPA1 INNER JOIN IPA2 ON IPA1.COD = IPA2.COD
+            WHERE IPA2.COD=?
+            ORDER BY IPA2.FECHA;
+			<situacion_column>3</situacion_column>
+			<situacion>E</situacion>
+			<situacion>D</situacion>
+			<situacion>R</situacion>
+			<situacion>A</situacion>
+		</select_data>
+		<graph y_axis_name='CNP m s.n.m.'>
+			<title>Evolución de la cota piezométrica en el sondeo {}
+				<column>3</column>
+			</title>
+			<title>MASub 07.{0:03d} Acuífero {1}
+				<column>1</column>
+				<column>2</column>
+			</title>
+			<legend_master>'{}'
+				<column>3</column>
+			</legend_master>
 		</graph>
 	</project>
 </xyhl>

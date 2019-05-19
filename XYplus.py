@@ -33,12 +33,16 @@ def select_project(FILENAME):
 
     print('Projects in ' + FILENAME)
     projects = []
+    iproject = []
     for i, project in enumerate(root.findall('project')):
         projects.append(project)
+        iproject.append(str(i))
         print(i, end=' ')
         print('. ' + project.get('name'))
     print('Select project number:', end=' ')
     choice = input()
+#    if choice not in iproject:
+#        return None
     return projects[int(choice)]
 
 
@@ -52,10 +56,12 @@ def make_graphs(project):
             en XYplus_main
     """
     from os.path import join
+    from datetime import datetime
     import pyodbc
     import db_con_str
-    from time_series import XYt_1
+    from time_series import XYt_1, XYt_1_xml
     import XYplus_parameters as par
+    FILE_SUMMARY = '_xy_summary.xml'
 
     db = project.find('db').text
     con = pyodbc.connect(db_con_str.con_str(db))
@@ -79,6 +85,11 @@ def make_graphs(project):
     else:
         isitu = None
 
+    fo = open(join(par.dir_out, FILE_SUMMARY), 'w')
+    fo.write('<?xml version="1.0" encoding="windows-1252"?>\n')
+    fo.write('<xy>\n')
+    fo.write('<grabado>{}</grabado>\n'.
+             format(datetime.now().strftime("%d/%m/%Y %H:%M:%S")))
     for row in cur:
 
         # datos de la serie principal
@@ -109,7 +120,21 @@ def make_graphs(project):
 
         # dibuja el gráfico
         XYt_1(ts_4xy, stitle, ylabel, dst)
+        
+        # graba los datos
+        if par.write_data:
+            XYt_1_xml(ts_4xy, stitle, ylabel, dst)
+            
+        # escribe el resumen de los puntos principales
+        for ts1 in ts_4xy:
+            fo.write('<d>{0}\t{1}\t{2:d}</d>\n'.
+                     format(ts1.fechas[0].strftime("%d/%m/%Y %H:%M:%S"),
+                            ts1.fechas[-1].strftime("%d/%m/%Y %H:%M:%S"),
+                            len(ts1.fechas)))
+            break
 
+    fo.write('</xy>\n')
+    fo.close()
     con.close()
 
 
@@ -135,7 +160,11 @@ def _datos_aux_get(project, cur, id1, ifecha, ivalue):
     from copy import deepcopy
     from time_series import Time_series
     select_data = project.find('select_data').text.strip()
-    select_aux = project.find('select_master_related').text.strip()
+    select_aux_tag = project.find('select_master_related')
+    if select_aux_tag == None:
+        lf.write('{0} no tiene series auxiliares'.format(id1))
+        return []
+    select_aux = select_aux_tag.text.strip()
     cur.execute(select_aux, id1)
     cods = [row for row in cur]
     tss = []
