@@ -61,7 +61,7 @@ def make_graphs(project):
     import db_con_str
     from time_series import XYt_1, XYt_1_xml
     import XYplus_parameters as par
-    FILE_SUMMARY = '_xy_summary.xml'
+    FILE_SUMMARY = '_resumen_datos.txt'
 
     db = project.find('db').text
     con = pyodbc.connect(db_con_str.con_str(db))
@@ -85,11 +85,20 @@ def make_graphs(project):
     else:
         isitu = None
 
-    fo = open(join(par.dir_out, FILE_SUMMARY), 'w')
-    fo.write('<?xml version="1.0" encoding="windows-1252"?>\n')
-    fo.write('<xy>\n')
-    fo.write('<grabado>{}</grabado>\n'.
-             format(datetime.now().strftime("%d/%m/%Y %H:%M:%S")))
+    element_file_resumen = project.find('select_master/file_resumen')
+    if element_file_resumen:
+        headers, ii = _file_resumen_headers(element_file_resumen)
+        # a los headers de file_resumen se añaden los de los datos rerpesentados
+        for header_new in ('Fecha primer dato', 'Fecha último dato',
+                           'Número de datos en la select'):
+            headers.append(header_new)
+        header = '\t'.join(headers)
+        fo = open(join(par.dir_out, FILE_SUMMARY), 'w', encoding='utf-8')
+        fecha = datetime.now().strftime("%d/%m/%Y %H:%M:%S")
+        fo.write(f'Fecha de grabación: {fecha}\n')
+        fo.write('Resumen de datos graficados\n')
+        fo.write(f'{header}\n')
+
     for row in cur:
 
         # datos de la serie principal
@@ -120,21 +129,33 @@ def make_graphs(project):
 
         # dibuja el gráfico
         XYt_1(ts_4xy, stitle, ylabel, dst)
-        
+
         # graba los datos
         if par.write_data:
             XYt_1_xml(ts_4xy, stitle, ylabel, dst)
-            
-        # escribe el resumen de los puntos principales
-        for ts1 in ts_4xy:
-            fo.write('<d>{0}\t{1}\t{2:d}</d>\n'.
-                     format(ts1.fechas[0].strftime("%d/%m/%Y %H:%M:%S"),
-                            ts1.fechas[-1].strftime("%d/%m/%Y %H:%M:%S"),
-                            len(ts1.fechas)))
-            break
 
-    fo.write('</xy>\n')
-    fo.close()
+        # escribe el resumen del punto principal
+        if element_file_resumen:
+            for ts1 in ts_4xy:
+                values = []
+                for i in ii:
+                    if isinstance(row[i], int):
+                        values.append(f'{row[i]:d}')
+                    elif isinstance(row[i], float):
+                        values.append(f'{row[i]:f}')
+                    else:
+                        values.append(f'{row[i]}')
+
+                values = '\t'.join(values)
+                fo.write('{}\t{}\t{}\t{:d}\n'.
+                         format(values,
+                                ts1.fechas[0].strftime("%d/%m/%Y %H:%M:%S"),
+                                ts1.fechas[-1].strftime("%d/%m/%Y %H:%M:%S"),
+                                len(ts1.fechas)))
+                break
+
+    if element_file_resumen:
+        fo.close()
     con.close()
 
 
@@ -444,9 +465,8 @@ def validate_parameters():
         ws = sdate.split('/')
         try:
             return date(int(ws[2]), int(ws[1]), int(ws[0]))
-        except Exception as error:
-            raise ValueError('La variable {} está mal escrita'.
-                             format(variable_name))
+        except Exception as er:
+            raise ValueError(f'Param fechas:error al formar la fecha {er}')
 
     if not exists(par.f_xml):
         raise ValueError('No existe {}'.format(par.f_xml))
@@ -460,7 +480,22 @@ def validate_parameters():
         raise ValueError('La variable show_hl debe ser 0 o 1')
     if par.show_aux not in (0, 1):
         raise ValueError('La variable show_aux debe ser 0 o 1')
-    par.date_1 = validate_date(par.date_1, 'date_1')
-    par.date_2 = validate_date(par.date_2, 'date_2')
-    if par.date_1 >= par.date_2:
-        raise ValueError('date_1 debe ser < que date_2')
+#    par.date_1 = validate_date(par.date_1, 'date_1')
+#    par.date_2 = validate_date(par.date_2, 'date_2')
+#    if par.date_1 >= par.date_2:
+#        raise ValueError('date_1 debe ser < que date_2')
+
+
+def _file_resumen_headers(element):
+    """
+    devuelve el contenido de los subelements columns en el element file_resumen
+    """
+    ee = element.findall('column')
+    if ee:
+        tmp = [(int(e.text.strip()), e.get('header')) for e in ee]
+        cols = [ tmp1[0] - 1 for tmp1 in tmp ]
+        headers = [ tmp1[1] for tmp1 in tmp ]
+        return headers, cols
+    else:
+        raise ValueError('el elemento file_resumen debe tener al menos un' +\
+                         ' subelemento column')

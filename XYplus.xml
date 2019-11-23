@@ -40,18 +40,24 @@ Oficina
 		</graph>
 	</project>
 	<project name="Vega Media. CNP con umbrales 2018 y DIA">
-		<db>\\ESMUR0001\hidrogeologia\BD_IPASUB\ipasub97.mdb</db>
+		<db>C:\Users\solis\Documents\DB\Ipasub97.mdb</db>
 		<select_master id_column="1">
-            SELECT IPA1.COD AS COD, IPA1_UMBRAL.COD_UMBRAL AS COD_UMBRAL, First(IPA1.TOPONIMIA) AS TOPONIMIA, First(ACUIFEROS.NOMACU) AS NOMACU, First(ACUIFEROS.MASUB) AS MASUB
+            SELECT IPA1.COD AS COD, IPA1_UMBRAL.COD_UMBRAL AS COD_UMBRAL, First(IPA1.TOPONIMIA) AS TOPONIMIA, First(ACUIFEROS.NOMACU) AS NOMACU, First(IPA1.MASUB) AS MASUB, First(IPA1.X_UTM) AS XUTM, First(IPA1.Y_UTM) AS YUTM
             FROM ((ACUIFEROS INNER JOIN IPA1 ON ACUIFEROS.COD_ACU = IPA1.ACUIFERO) INNER JOIN IPA1_UMBRAL ON IPA1.COD = IPA1_UMBRAL.COD)
             GROUP BY IPA1.COD, IPA1_UMBRAL.COD_UMBRAL
             HAVING (((IPA1_UMBRAL.COD_UMBRAL)='CSA 26-5-2018'))
             ORDER BY IPA1.COD;
-			<file_name>{0:d}_{1}_{2}.png
+			<file_name>{}_{}_{}.png
 				<column>5</column>
 				<column>4</column>
 				<column>1</column>
 			</file_name>
+			<file_resumen>
+				<column header="COD">1</column>
+				<column header="Nombre">3</column>
+				<column header="XUTM">6</column>
+				<column header="YUTM">7</column>
+			</file_resumen>
 		</select_master>
 		<select_master_related id_master="1">
 			SELECT COD1,COD2 FROM IPA1_SELF WHERE COD1=? ORDER BY COD2
@@ -60,7 +66,7 @@ Oficina
 		<select_data fecha_column="2" value_column="4">
             SELECT IPA2.COD, IPA2.FECHA, IPA2.SITUACION, [ipa1].[z]-[pnp] AS CNP
             FROM IPA1 INNER JOIN IPA2 ON IPA1.COD = IPA2.COD
-            WHERE IPA2.COD=? AND IPA2.FECHA>#01/01/2018#
+            WHERE IPA2.COD=?
             ORDER BY IPA2.FECHA;
 			<situacion_column>3</situacion_column>
 			<situacion>E</situacion>

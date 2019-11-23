@@ -1,0 +1,99 @@
+Programa para hacer gráficos temporales XY que se graban en un directorio de salida en formato png. El programa está pensando especialmente para trabajar con umbrales piezométricos,que están almacenados en tablas de una BDD (en la actualidad Ms Access). El programa ejecuta una serie de select que devuelven los puntos y sus datos temporales y los grafica usando la librería matplotlib. 
+
+El programa es para ser usado por un técnico que tiene conocimientos básicos de xml (si no sabes nada de xml puedes consultar https://www.w3schools.com/xml/) y de python. En este texto me refiero un contenido de tipo <name a="1">content</name> como un elemento de nombre name con un texto content y un atributo a de valor "1".
+
+Instalación
+Copia el contenido de los fichero *.py y XYplus.xml en un directorio; en python tienes que instalar pyodbc, numpy y matplotlib.
+
+El programa no tiene GUI; se ejecuta desde la línea de comandos python pathto\XYplus_main.py; también puedes hacer cd pathto y después python XYplus_main.py; también lo puedes ejecutar desde una ide de python; si utilizas anaconda lo tienes que ejecutar desde la ventana conda. Desde el programa puedes elegir el proyecto (qué datos) del que quieres hacer los gráficos; los proyectos están definidos en el fichero XYplus.xml, los contenidos de este fichero se editan con un editor de texto plano; el directorio de salida del programa (donde se grabarán los gráficos) y unas opciones básicas de ejecución están definidas en el fichero XYplus_parameters.py que también tiene que editarse con un editor de texto plano. Antes de ejecutar el programa tienes que revisar los contenidos de estos 2 ficheros, o crear unos contenidos nuevos.  
+
+En el fichero XYplus.xml el elemento project cpntiene los conjuntos de datos y los gráficos xy de evolución temporal. Puede haber muchos elementos project y puedes crear y borrar estos bloques según tus necesidades
+
+En el fichero XYplus_parameters.py se encuentran definidas las opciones particulares de una ejecución en forma de un valor que se asigna a una variable (variable = valor); modifica el valor de la variable, pero no el nombre de la variable; las variables tipo string van entre comillas, simples o dobles; las numéricas no. Los contenidos que puedes controlar son:
+f_xml	nombre del fichero de parámetros, en principio siempre 'XYplus.xml'
+dir_out	Directorio de salida (formato r'directorio_de_salida'); debe existir
+show_hl [0,1]	Si contiene un 1 se graban los umbrales (si están defeinidos en f_xml); si contiene un 0 no se graban aunque estén definidos
+show_aux [0,1]	Si 1 graba las series auxiliares al punto principal (ipa1self); si 0 no
+write_data [0,1]	Si 1 graba un fichero con los datos de cada XY; si 0 no
+
+Una breve explicación del contenido del fichero xml; en el fichero xml no puedes cambiar el nombre de los elementos ni de susatributos, ni la disposición de los elementos; sí puedes cambiar el texto de los elementos y el valor de sus atributos
+
+<?xml version="1.0"?>
+Elemento en la primera línea de un fichero xml
+
+<xyhl>
+Elemento raíz
+
+<project name="Vega Media. CNP con umbrales 2018 y DIA">
+elemento project. Notiene texto. Un project define ensu interior un conjunto de elementos que caracterizan un conjunto de puntos en los que se configuran los xy de una variable de medida
+atributo name, breve nombre que identifica al proyecto
+
+	<db>\\ESMUR0001\hidrogeologia\BD_IPASUB\ipasub97.mdb</db>
+	nombre completo de la BDD donde están los datos
+	
+	<select_master id_column="1">
+		SELECT IPA1.COD AS COD, IPA1_UMBRAL.COD_UMBRAL AS COD_UMBRAL, First(IPA1.TOPONIMIA) AS TOPONIMIA, First(ACUIFEROS.NOMACU) AS NOMACU, First(ACUIFEROS.MASUB) AS MASUB
+		FROM ((ACUIFEROS INNER JOIN IPA1 ON ACUIFEROS.COD_ACU = IPA1.ACUIFERO) INNER JOIN IPA1_UMBRAL ON IPA1.COD = IPA1_UMBRAL.COD)
+		GROUP BY IPA1.COD, IPA1_UMBRAL.COD_UMBRAL
+		HAVING (((IPA1_UMBRAL.COD_UMBRAL)='CSA 26-5-2018'))
+		ORDER BY IPA1.COD;
+		Texto de elemento. select que utiliza el programa para identificar los puntos que se van a representar; debe figurar como mínimo del código del punto y los contenidos que quieres que aparezcan en: el título del gráfico; el nombre del fichero del gráfico; los contenidos de un fichero de resumen de los datos representados.
+		Atributo column indica el número de columna del código en la select
+	
+			<file_name>{0:d}_{1}_{2}.png
+			Texto del elemento. Es una expresión de python para formar el nombre del fichero del gráfico; cada {} se sustituye por una columna de la select; si algún contenido es un entero se indicar como {:d}; si un real {:f}
+				<column>
+				Tantos elementos column como contenidos {} en <file_name>; columna de la select que será sustituida por un {}
+
+			<file_resumen>
+			Elmento opcional sin texto ni atributos; este elemento define los contenidos de un fichero resumen de los puntos que se grafican 
+				<column header="COD">1</column>
+				Elemento column texto. Número de columna de select_master que se graba
+				Atributo header.Indica la cabecera de la columna en el fichero
+				Debe haber al menos un elemento column dentro de file_resumen, típicamente el código del punto
+
+		<select_master_related id_master="1">
+			SELECT COD1,COD2 FROM IPA1_SELF WHERE COD1=? ORDER BY COD2
+			Texto del elemento. select que relaciona cada código devuelto en el elemento select_master con otros códigos que tienen datos del mismo tipo y que  también se quieren representar; debe contener una condición where con un ? que permita sustituir el código de select_master en la ejecución de la select
+			Atributo id_master. indica la columna donde está el código del punto principal, lo normal es construir la select para que siempre sea la primera columna	
+				<select_xy>SELECT X_UTM, Y_UTM FROM IPA1 WHERE COD=?</select_xy>
+				de momento no se utiliza
+
+		<select_data fecha_column="2" value_column="4">
+            SELECT IPA2.COD, IPA2.FECHA, IPA2.SITUACION, [ipa1].[z]-[pnp] AS CNP
+            FROM IPA1 INNER JOIN IPA2 ON IPA1.COD = IPA2.COD
+            WHERE IPA2.COD=? AND IPA2.FECHA>#01/01/2018#
+            ORDER BY IPA2.FECHA;
+			Texto del elemento. select de los datos que se van a representar. Tiene 2 atributos fecha_column y value_column que indican al columna de la select donde está la fecha y la que está el valor. Debe contener un elemento ? que será sustituido por el punto de select_master a representar
+				<situacion_column>3</situacion_column>
+				Texto delelemento. columna de la select donde está el campo situación; este campo es opcional
+				<situacion>E</situacion>
+				tantos eleemntos situación como valores de situación se van a diferenciar el XY; 
+
+		<select_umbrales umbral_column="3">
+			SELECT IPA1_UMBRAL.COD_UMBRAL, IPA1_UMBRAL.PARAMETRO, IPA1_UMBRAL.UMBRAL
+			FROM IPA1_UMBRAL
+			WHERE IPA1_UMBRAL.COD=? AND IPA1_UMBRAL.COD_UMBRAL=? AND IPA1_UMBRAL.PARAMETRO=?
+			ORDER BY IPA1_UMBRAL.COD, IPA1_UMBRAL.COD_UMBRAL, IPA1_UMBRAL.PARAMETRO;
+			texto delelemento. select para extraer la información de umbrales asociados al punto; este elemento es opcional
+			atributo umbral_column. columna con el código del umbral que se quiere representar
+				<umbral cod="CSA 26-5-2018" parametro="CNP ND"/>
+				Elemento sin texto
+				Tantos elementos como umbrales vamos a representar, 2 atributos: cod, código del umbral; parametro, variable que representa el umbral (por ejemplo, un umbral piezométrico se puede representar como PNPo CNP); para codificaciones ver la BDD
+
+		<graph y_axis_name='CNP m s.n.m.'>
+			Elemento. Datos que caracterizan el gráfico XY; el elemento no tiene texto
+			atributo y_axis_name. texto en el eje y (al se gráficos temporales no es necesario definir un texto para el eje x 
+			<title>Evolución piezométrica sondeo {} ({})
+				Texto del elemento. Primera línea del título del gráfico, normalmente contendrá uno o varios {} donde irán las columnas del elemento <select_master> que se indican en los subelementos column a continuación  
+					<column>3</column> 
+					Texto del elemento. número de columna de la select de <select_master> que se sustituirá por un {} en el elemento <title>
+					habrá tantos elementos <column> como {} en el elemento <title>. 
+			<legend_master>'{}'
+				Texto del elemento. Leyenda de cada serie que va en gráfico XY con {} serán sustituidos por columnas de select_master
+				<column>
+				Texto del elemento. número de columna de <select_master> para la leyenda; se pondrá normalmente el código del punto 
+			<legend_umbrales>U. {} {}
+				Idem para la leyenda de los umbrales
+
+	</project>
